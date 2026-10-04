@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: lemon-orbit-docker
+    runtime: docker
+    branch: main
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: commit
+    healthCheckPath: /healthz
