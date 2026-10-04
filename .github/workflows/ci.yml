@@ -1,0 +1,30 @@
+name: Validate Docker image
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: node --check script.js
+      - name: Build image
+        run: docker build -t lemon-orbit:test .
+      - name: Check container with a custom port
+        run: |
+          docker run -d --name lemon-orbit-test -e PORT=8080 -p 8080:8080 lemon-orbit:test
+          trap 'docker logs lemon-orbit-test; docker rm -f lemon-orbit-test' EXIT
+          curl --fail --retry 10 --retry-connrefused --retry-delay 1 http://localhost:8080/healthz
+          for resource in index.html styles.css script.js; do
+            curl --fail --silent --show-error "http://localhost:8080/$resource" -o "/tmp/$resource"
+            cmp "$resource" "/tmp/$resource"
+          done
