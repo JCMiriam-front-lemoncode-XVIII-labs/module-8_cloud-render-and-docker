@@ -1,0 +1,7 @@
+**
+!Dockerfile
+!index.html
+!styles.css
+!script.js
+!nginx/
+!nginx/default.conf.template
